@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rizwan AI Model Chatbot</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e0e7ff, #f0fdfa);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 15px;
+    background: rgba(255,255,255,0.7);
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.brand,
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand {
+    min-width: 0;
+}
+
+.brand span {
+    overflow-wrap: anywhere;
+}
+
+.user-area {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.logout-link {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 15px;
+    max-width: min(70%, 520px);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    overflow-wrap: anywhere;
+}
+
+.user {
+    background: #2563eb;
+    color: white;
+    margin-left: auto;
+    display: block;
+}
+
+.bot {
+    background: rgba(255,255,255,0.9);
+}
+
+.chat-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.message-text {
+    flex: 1;
+    white-space: pre-wrap;
+}
+
+.input-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.8);
+}
+
+input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.voice-button {
+    background: #2563eb;
+    flex-shrink: 0;
+}
+
+.voice-button.listening {
+    background: #dc2626;
+}
+
+@media (max-width: 520px) {
+    .container {
+        max-width: none;
+    }
+
+    .header {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .brand {
+        gap: 8px;
+    }
+
+    .brand span {
+        font-size: 16px;
+        line-height: 1.2;
+    }
+
+    .user-area {
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .chat-box {
+        padding: 10px;
+    }
+
+    .message {
+        max-width: 86%;
+        padding: 9px 12px;
+        font-size: 14px;
+    }
+
+    .chat-avatar {
+        width: 26px;
+        height: 26px;
+    }
+
+    .input-area {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    input {
+        padding: 10px 12px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 12px;
+    }
+
+    .voice-button {
+        width: 42px;
+        min-width: 42px;
+        padding: 10px 0;
+    }
+}
+
+@media (max-width: 360px) {
+    .brand span {
+        font-size: 14px;
+    }
+
+    .input-area {
+        gap: 6px;
+    }
+
+    button {
+        padding: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+        <div class="brand">
+            <img src="/static/mypic.jpg" class="avatar" alt="Chatbot">
+            <span>Rizwan AI Model Chatbot</span>
+        </div>
+        <div class="user-area">
+            <span>{{ username }}</span>
+            <a class="logout-link" href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="chat-box" id="chat"></div>
+
+    <div class="input-area">
+        <input type="text" id="message" placeholder="Type your message...">
+        <button
+            class="voice-button"
+            id="voiceButton"
+            onclick="startVoiceInput()"
+            title="Voice input"
+            aria-label="Voice input"
+        >&#127908;</button>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+function addBotMessage(text) {
+    let chat = document.getElementById("chat");
+    let botMessage = document.createElement("div");
+    botMessage.className = "message bot";
+
+    let avatar = document.createElement("img");
+    avatar.src = "/static/mypic.jpg";
+    avatar.className = "chat-avatar";
+    avatar.alt = "Bot";
+
+    let replyText = document.createElement("div");
+    replyText.className = "message-text";
+    replyText.textContent = text;
+
+    botMessage.appendChild(avatar);
+    botMessage.appendChild(replyText);
+    chat.appendChild(botMessage);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function startVoiceInput() {
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let voiceButton = document.getElementById("voiceButton");
+    let input = document.getElementById("message");
+
+    if (!SpeechRecognition) {
+        addBotMessage("Voice input is not supported in this browser.");
+        return;
+    }
+
+    let recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    voiceButton.classList.add("listening");
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        input.value = event.results[0][0].transcript;
+        input.focus();
+    };
+
+    recognition.onerror = function() {
+        addBotMessage("Voice input failed. Please allow microphone access and try again.");
+    };
+
+    recognition.onend = function() {
+        voiceButton.classList.remove("listening");
+    };
+}
+
+async function sendMessage() {
+    let input = document.getElementById("message");
+    let msg = input.value.trim();
+
+    if (!msg) return;
+
+    let chat = document.getElementById("chat");
+
+    let userMessage = document.createElement("div");
+    userMessage.className = "message user";
+    userMessage.textContent = msg;
+    chat.appendChild(userMessage);
+
+    input.value = "";
+
+    let res = await fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: msg})
+    });
+
+    let data = await res.json();
+    addBotMessage(data.reply);
+}
+
+document.getElementById("message").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
+</script>
+</body>
+</html>

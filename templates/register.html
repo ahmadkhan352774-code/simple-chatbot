@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - AI Chatbot</title>
+<style>
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e0e7ff, #f0fdfa);
+}
+
+.auth-box {
+    width: min(380px, calc(100% - 32px));
+    padding: 28px;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+}
+
+h1 {
+    margin: 0 0 20px;
+    font-size: 24px;
+}
+
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+button {
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px 14px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.message {
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.switch {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 14px;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+<main class="auth-box">
+    <div class="brand">
+        <img src="/static/mypic.jpg" class="avatar" alt="Chatbot">
+        <span>Rizwan AI Model Chatbot</span>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="message">{{ messages[0] }}</div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="post">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="switch">
+        Already have an account? <a href="/login">Login</a>
+    </div>
+</main>
+</body>
+</html>
