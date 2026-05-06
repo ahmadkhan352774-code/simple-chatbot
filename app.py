@@ -236,6 +236,28 @@ def admin():
     return render_template("admin.html", stats=stats, admin_username=session["username"])
 
 
+@app.route("/admin/memory/clear", methods=["POST"])
+@login_required
+def admin_clear_memory():
+    if not is_admin():
+        return redirect(url_for("home"))
+
+    username = request.form.get("username", "").strip()
+    history = load_chat_history()
+
+    if username:
+        CHAT_MEMORY.pop(username, None)
+        history.pop(username, None)
+        flash(f"Memory cleared for {username}.")
+    else:
+        CHAT_MEMORY.clear()
+        history = {}
+        flash("Memory cleared for all users.")
+
+    save_chat_history(history)
+    return redirect(url_for("admin"))
+
+
 @app.route("/chat", methods=["POST"])
 @login_required
 def chat():

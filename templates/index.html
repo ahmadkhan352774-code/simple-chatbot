@@ -41,6 +41,9 @@ body.dark {
 
 body {
     margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     font-family: Arial, sans-serif;
     color: var(--text);
     background:
@@ -204,6 +207,8 @@ button:hover {
 .chat-panel {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .mobile-header {
@@ -292,6 +297,8 @@ input {
     .app-shell {
         display: flex;
         flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
         border: none;
     }
 
@@ -303,12 +310,35 @@ input {
         display: flex;
     }
 
+    .mobile-header .brand {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mobile-header .tool-row {
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .mobile-header button,
+    .mobile-header a {
+        font-size: 14px;
+    }
+
     .message {
         max-width: 88%;
     }
 
     .chat-box {
+        flex: 1;
+        min-height: 0;
         padding: 12px;
+    }
+
+    .input-area {
+        margin-top: auto;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
 }
 
@@ -325,6 +355,20 @@ input {
 
     button {
         padding: 9px 10px;
+    }
+
+    .mobile-header {
+        padding: 10px;
+    }
+
+    .mobile-header .avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .mobile-header .icon-button {
+        min-height: 36px;
+        padding: 7px 9px;
     }
 }
 </style>
@@ -368,6 +412,7 @@ input {
             </div>
             <div class="tool-row">
                 <button class="icon-button" type="button" onclick="toggleTheme()" title="Dark/light mode">Mode</button>
+                <button class="icon-button" type="button" onclick="clearMemory()" title="Clear memory">Clear</button>
                 {% if is_admin %}<a class="admin-link" href="/admin">Admin</a>{% endif %}
                 <a href="/logout">Logout</a>
             </div>

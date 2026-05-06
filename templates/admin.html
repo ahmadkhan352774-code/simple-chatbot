@@ -51,6 +51,41 @@ a {
     font-weight: bold;
 }
 
+button {
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.danger-button {
+    background: #dc2626;
+}
+
+.danger-button:hover {
+    background: #b91c1c;
+}
+
+.message {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e3a8a;
+}
+
+.admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
 .panel {
     overflow: hidden;
     border: 1px solid #d8e0ea;
@@ -91,6 +126,11 @@ tr:last-child td {
     white-space: nowrap;
 }
 
+.action {
+    width: 150px;
+    white-space: nowrap;
+}
+
 @media (max-width: 640px) {
     .topbar {
         align-items: flex-start;
@@ -100,6 +140,15 @@ tr:last-child td {
     th:nth-child(3),
     td:nth-child(3) {
         display: none;
+    }
+
+    .admin-actions {
+        justify-content: stretch;
+    }
+
+    .admin-actions form,
+    .admin-actions button {
+        width: 100%;
     }
 }
 </style>
@@ -112,8 +161,20 @@ tr:last-child td {
             <span>Admin Panel</span>
         </div>
         <div>
-            <span>{{ admin_username }}</span> · <a href="/">Chat</a> · <a href="/logout">Logout</a>
+            <span>{{ admin_username }}</span> | <a href="/">Chat</a> | <a href="/logout">Logout</a>
         </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="message">{{ messages[0] }}</div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-actions">
+        <form method="post" action="/admin/memory/clear">
+            <button class="danger-button" type="submit">Clear All Memory</button>
+        </form>
     </div>
 
     <section class="panel">
@@ -123,6 +184,7 @@ tr:last-child td {
                     <th>User</th>
                     <th class="count">Messages</th>
                     <th>Latest Message</th>
+                    <th class="action">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -131,6 +193,12 @@ tr:last-child td {
                         <td>{{ user.username }}</td>
                         <td class="count">{{ user.message_count }}</td>
                         <td>{{ user.latest }}</td>
+                        <td class="action">
+                            <form method="post" action="/admin/memory/clear">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <button class="danger-button" type="submit">Clear</button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
