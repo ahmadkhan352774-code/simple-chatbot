@@ -39,8 +39,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "change-this-secret-key")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "openrouter/owl-alpha"
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
+CHAT_HISTORY_FILE = os.path.join(BASE_DIR, "chat_history.json")
 CHAT_MEMORY = {}
-MAX_MEMORY_MESSAGES = 12
+MAX_MEMORY_MESSAGES = 20
 
 
 def get_api_key():
@@ -53,8 +54,56 @@ def get_model():
     return os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
 
 
+def get_admin_username():
+    load_dotenv()
+    return os.environ.get("ADMIN_USERNAME", "Rizwan")
+
+
+def is_admin():
+    return session.get("username") == get_admin_username()
+
+
+def load_json_file(path, default):
+    if not os.path.exists(path):
+        return default
+
+    with open(path, "r", encoding="utf-8") as file:
+        try:
+            return json.load(file)
+        except json.JSONDecodeError:
+            return default
+
+
+def save_json_file(path, data):
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=2)
+
+
+def load_chat_history():
+    return load_json_file(CHAT_HISTORY_FILE, {})
+
+
+def save_chat_history(history):
+    save_json_file(CHAT_HISTORY_FILE, history)
+
+
+def get_user_history(username=None):
+    username = username or session["username"]
+    history = load_chat_history()
+    return history.get(username, [])
+
+
+def save_user_message(username, role, content):
+    history = load_chat_history()
+    history.setdefault(username, []).append({"role": role, "content": content})
+    save_chat_history(history)
+
+
 def get_user_memory():
-    return CHAT_MEMORY.setdefault(session["username"], [])
+    username = session["username"]
+    if username not in CHAT_MEMORY:
+        CHAT_MEMORY[username] = get_user_history(username)[-MAX_MEMORY_MESSAGES:]
+    return CHAT_MEMORY[username]
 
 
 def trim_memory(messages):
@@ -63,16 +112,11 @@ def trim_memory(messages):
 
 
 def load_users():
-    if not os.path.exists(USERS_FILE):
-        return {}
-
-    with open(USERS_FILE, "r", encoding="utf-8") as file:
-        return json.load(file)
+    return load_json_file(USERS_FILE, {})
 
 
 def save_users(users):
-    with open(USERS_FILE, "w", encoding="utf-8") as file:
-        json.dump(users, file, indent=2)
+    save_json_file(USERS_FILE, users)
 
 
 def login_required(view):
@@ -91,7 +135,7 @@ def login_required(view):
 @app.route("/")
 @login_required
 def home():
-    return render_template("index.html", username=session["username"])
+    return render_template("index.html", username=session["username"], is_admin=is_admin())
 
 
 @app.after_request
@@ -159,7 +203,37 @@ def logout():
 @login_required
 def clear_memory():
     CHAT_MEMORY.pop(session["username"], None)
+    history = load_chat_history()
+    history.pop(session["username"], None)
+    save_chat_history(history)
     return jsonify({"status": "cleared"})
+
+
+@app.route("/history")
+@login_required
+def history():
+    return jsonify({"messages": get_user_history()})
+
+
+@app.route("/admin")
+@login_required
+def admin():
+    if not is_admin():
+        return redirect(url_for("home"))
+
+    users = load_users()
+    history = load_chat_history()
+    stats = []
+    for username in sorted(users):
+        messages = history.get(username, [])
+        latest = messages[-1]["content"] if messages else "No chat yet"
+        stats.append({
+            "username": username,
+            "message_count": len(messages),
+            "latest": latest,
+        })
+
+    return render_template("admin.html", stats=stats, admin_username=session["username"])
 
 
 @app.route("/chat", methods=["POST"])
@@ -170,7 +244,14 @@ def chat():
         return jsonify({"reply": "OpenRouter API key is missing. Set OPENROUTER_API_KEY first."}), 500
 
     user_message = request.json.get("message", "")
-    messages = get_user_memory().copy()
+    messages = [{
+        "role": "system",
+        "content": (
+            "You are Rizwan AI Model Chatbot. Be helpful, concise, and remember "
+            "the recent chat context provided in this conversation."
+        ),
+    }]
+    messages.extend(get_user_memory().copy())
     messages.append({"role": "user", "content": user_message})
 
     headers = {
@@ -200,6 +281,8 @@ def chat():
         memory.append({"role": "user", "content": user_message})
         memory.append({"role": "assistant", "content": reply})
         trim_memory(memory)
+        save_user_message(session["username"], "user", user_message)
+        save_user_message(session["username"], "assistant", reply)
 
         return jsonify({"reply": reply})
 

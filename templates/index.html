@@ -5,45 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rizwan AI Model Chatbot</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #e0e7ff, #f0fdfa);
+:root {
+    color-scheme: light;
+    --page: #f7fafc;
+    --panel: rgba(255,255,255,0.88);
+    --panel-solid: #ffffff;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #d8e0ea;
+    --accent: #2563eb;
+    --accent-strong: #1d4ed8;
+    --bot: #ffffff;
+    --user: #2563eb;
+    --shadow: rgba(15, 23, 42, 0.08);
+}
+
+body.dark {
+    color-scheme: dark;
+    --page: #10151f;
+    --panel: rgba(22, 30, 44, 0.92);
+    --panel-solid: #161e2c;
+    --text: #edf2f7;
+    --muted: #9aa8bc;
+    --border: #293548;
+    --accent: #38bdf8;
+    --accent-strong: #0ea5e9;
+    --bot: #1d2738;
+    --user: #0f76a8;
+    --shadow: rgba(0, 0, 0, 0.3);
 }
 
 * {
     box-sizing: border-box;
 }
 
-.container {
-    max-width: 700px;
-    margin: auto;
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.12), transparent 30%),
+        var(--page);
 }
 
-.header {
+.app-shell {
+    width: min(1120px, 100%);
+    height: 100vh;
+    height: 100dvh;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    background: rgba(255,255,255,0.22);
+}
+
+.sidebar,
+.chat-panel {
+    min-height: 0;
+}
+
+.sidebar {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 15px;
-    background: rgba(255,255,255,0.7);
-    border-bottom: 1px solid #ddd;
-    font-weight: bold;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
 }
 
 .brand,
-.user-area {
+.user-area,
+.tool-row,
+.history-head {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .brand {
+    font-weight: bold;
     min-width: 0;
 }
 
@@ -51,60 +93,158 @@ body {
     overflow-wrap: anywhere;
 }
 
-.user-area {
-    font-size: 14px;
-    flex-shrink: 0;
-}
-
-.logout-link {
-    color: #2563eb;
-    text-decoration: none;
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
+.avatar,
+.chat-avatar {
     border-radius: 50%;
     object-fit: cover;
     object-position: center;
     flex-shrink: 0;
 }
 
-.chat-box {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    min-height: 0;
-}
-
-.message {
-    margin: 10px 0;
-    padding: 10px 14px;
-    border-radius: 15px;
-    max-width: min(70%, 520px);
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    overflow-wrap: anywhere;
-}
-
-.user {
-    background: #2563eb;
-    color: white;
-    margin-left: auto;
-    display: block;
-}
-
-.bot {
-    background: rgba(255,255,255,0.9);
+.avatar {
+    width: 42px;
+    height: 42px;
 }
 
 .chat-avatar {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
+}
+
+.user-area {
+    justify-content: space-between;
+    padding: 10px 0;
+    color: var(--muted);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.admin-link {
+    font-weight: bold;
+}
+
+.tool-row {
+    flex-wrap: wrap;
+}
+
+button {
+    min-height: 40px;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: var(--accent-strong);
+}
+
+.icon-button,
+.secondary-button {
+    background: var(--panel-solid);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.icon-button:hover,
+.secondary-button:hover {
+    background: rgba(148, 163, 184, 0.15);
+}
+
+.history-panel {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-head {
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.history-list {
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-item {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-solid);
+    box-shadow: 0 8px 24px var(--shadow);
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--text);
+}
+
+.history-item strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-box {
+    flex: 1;
+    min-height: 0;
+    padding: 18px;
+    overflow-y: auto;
+}
+
+.message {
+    width: fit-content;
+    max-width: min(74%, 620px);
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+    box-shadow: 0 8px 22px var(--shadow);
+}
+
+.user {
+    background: var(--user);
+    color: white;
+    margin-left: auto;
+}
+
+.bot {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--bot);
+    border: 1px solid var(--border);
 }
 
 .message-text {
@@ -112,153 +252,181 @@ body {
     white-space: pre-wrap;
 }
 
+.empty-state {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    text-align: center;
+}
+
 .input-area {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px 84px;
     gap: 10px;
-    padding: 10px;
-    background: rgba(255,255,255,0.8);
+    padding: 12px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
 }
 
 input {
-    flex: 1;
+    width: 100%;
     min-width: 0;
-    padding: 10px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-}
-
-button {
-    padding: 10px 15px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-solid);
+    color: var(--text);
+    font-size: 16px;
 }
 
 .voice-button {
-    background: #2563eb;
-    flex-shrink: 0;
+    padding: 0;
 }
 
 .voice-button.listening {
     background: #dc2626;
 }
 
-@media (max-width: 520px) {
-    .container {
-        max-width: none;
+@media (max-width: 760px) {
+    .app-shell {
+        display: flex;
+        flex-direction: column;
+        border: none;
     }
 
-    .header {
-        padding: 12px;
-        gap: 8px;
+    .sidebar {
+        display: none;
     }
 
-    .brand {
-        gap: 8px;
-    }
-
-    .brand span {
-        font-size: 16px;
-        line-height: 1.2;
-    }
-
-    .user-area {
-        gap: 8px;
-        font-size: 13px;
-    }
-
-    .avatar {
-        width: 34px;
-        height: 34px;
-    }
-
-    .chat-box {
-        padding: 10px;
+    .mobile-header {
+        display: flex;
     }
 
     .message {
-        max-width: 86%;
-        padding: 9px 12px;
-        font-size: 14px;
+        max-width: 88%;
     }
 
-    .chat-avatar {
-        width: 26px;
-        height: 26px;
-    }
-
-    .input-area {
-        gap: 8px;
-        padding: 8px;
-    }
-
-    input {
-        padding: 10px 12px;
-        font-size: 16px;
-    }
-
-    button {
-        padding: 10px 12px;
-    }
-
-    .voice-button {
-        width: 42px;
-        min-width: 42px;
-        padding: 10px 0;
+    .chat-box {
+        padding: 12px;
     }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 420px) {
     .brand span {
         font-size: 14px;
     }
 
     .input-area {
-        gap: 6px;
+        grid-template-columns: minmax(0, 1fr) 42px 68px;
+        gap: 7px;
+        padding: 8px;
     }
 
     button {
-        padding: 10px;
+        padding: 9px 10px;
     }
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-    <div class="header">
+<div class="app-shell">
+    <aside class="sidebar">
         <div class="brand">
             <img src="/static/mypic.jpg" class="avatar" alt="Chatbot">
             <span>Rizwan AI Model Chatbot</span>
         </div>
+
         <div class="user-area">
             <span>{{ username }}</span>
-            <a class="logout-link" href="/logout">Logout</a>
+            <span>
+                {% if is_admin %}<a class="admin-link" href="/admin">Admin</a> · {% endif %}
+                <a href="/logout">Logout</a>
+            </span>
         </div>
-    </div>
 
-    <div class="chat-box" id="chat"></div>
+        <div class="tool-row">
+            <button class="secondary-button" id="themeButton" type="button" onclick="toggleTheme()" title="Dark/light mode">Light</button>
+            <button class="secondary-button" type="button" onclick="clearMemory()" title="Clear memory and chat history">Clear Memory</button>
+        </div>
 
-    <div class="input-area">
-        <input type="text" id="message" placeholder="Type your message...">
-        <button
-            class="voice-button"
-            id="voiceButton"
-            onclick="startVoiceInput()"
-            title="Voice input"
-            aria-label="Voice input"
-        >&#127908;</button>
-        <button onclick="sendMessage()">Send</button>
-    </div>
+        <section class="history-panel" aria-label="Chat history">
+            <div class="history-head">
+                <span>Chat History</span>
+                <button class="icon-button" type="button" onclick="loadHistory()" title="Refresh history">Refresh</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </section>
+    </aside>
+
+    <main class="chat-panel">
+        <div class="mobile-header">
+            <div class="brand">
+                <img src="/static/mypic.jpg" class="avatar" alt="Chatbot">
+                <span>Rizwan AI</span>
+            </div>
+            <div class="tool-row">
+                <button class="icon-button" type="button" onclick="toggleTheme()" title="Dark/light mode">Mode</button>
+                {% if is_admin %}<a class="admin-link" href="/admin">Admin</a>{% endif %}
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+
+        <div class="chat-box" id="chat">
+            <div class="empty-state" id="emptyState">Start chatting. Your recent messages will stay in memory.</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="message" placeholder="Type your message..." autocomplete="off">
+            <button
+                class="voice-button"
+                id="voiceButton"
+                type="button"
+                onclick="startVoiceInput()"
+                title="Voice input"
+                aria-label="Voice input"
+            >&#127908;</button>
+            <button type="button" onclick="sendMessage()">Send</button>
+        </div>
+    </main>
 </div>
 
 <script>
+const chat = document.getElementById("chat");
+const emptyState = document.getElementById("emptyState");
+const historyList = document.getElementById("historyList");
+const themeButton = document.getElementById("themeButton");
+
+function applyTheme(theme) {
+    document.body.classList.toggle("dark", theme === "dark");
+    if (themeButton) {
+        themeButton.textContent = theme === "dark" ? "Dark" : "Light";
+    }
+    localStorage.setItem("chatTheme", theme);
+}
+
+function toggleTheme() {
+    applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
+}
+
+function hideEmptyState() {
+    if (emptyState) {
+        emptyState.style.display = "none";
+    }
+}
+
+function addUserMessage(text) {
+    hideEmptyState();
+    let userMessage = document.createElement("div");
+    userMessage.className = "message user";
+    userMessage.textContent = text;
+    chat.appendChild(userMessage);
+    chat.scrollTop = chat.scrollHeight;
+}
+
 function addBotMessage(text) {
-    let chat = document.getElementById("chat");
+    hideEmptyState();
     let botMessage = document.createElement("div");
     botMessage.className = "message bot";
 
@@ -277,6 +445,59 @@ function addBotMessage(text) {
     chat.scrollTop = chat.scrollHeight;
 }
 
+function renderChat(messages) {
+    [...chat.querySelectorAll(".message")].forEach(message => message.remove());
+    if (!messages.length && emptyState) {
+        emptyState.style.display = "grid";
+    }
+
+    messages.forEach(message => {
+        if (message.role === "user") {
+            addUserMessage(message.content);
+        } else if (message.role === "assistant") {
+            addBotMessage(message.content);
+        }
+    });
+}
+
+function renderHistory(messages) {
+    if (!historyList) return;
+    historyList.innerHTML = "";
+
+    if (!messages.length) {
+        let item = document.createElement("div");
+        item.className = "history-item";
+        item.textContent = "No history yet.";
+        historyList.appendChild(item);
+        return;
+    }
+
+    messages.slice().reverse().slice(0, 30).forEach(message => {
+        let item = document.createElement("div");
+        item.className = "history-item";
+        let role = document.createElement("strong");
+        role.textContent = message.role === "user" ? "You" : "Bot";
+        let text = document.createElement("span");
+        text.textContent = message.content.length > 120 ? message.content.slice(0, 120) + "..." : message.content;
+        item.appendChild(role);
+        item.appendChild(text);
+        historyList.appendChild(item);
+    });
+}
+
+async function loadHistory() {
+    let res = await fetch("/history");
+    let data = await res.json();
+    renderChat(data.messages || []);
+    renderHistory(data.messages || []);
+}
+
+async function clearMemory() {
+    await fetch("/memory/clear", {method: "POST"});
+    renderChat([]);
+    renderHistory([]);
+}
+
 function startVoiceInput() {
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let voiceButton = document.getElementById("voiceButton");
@@ -288,15 +509,16 @@ function startVoiceInput() {
     }
 
     let recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
+    recognition.lang = navigator.language || "en-US";
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     voiceButton.classList.add("listening");
     recognition.start();
 
     recognition.onresult = function(event) {
-        input.value = event.results[0][0].transcript;
+        let transcript = Array.from(event.results).map(result => result[0].transcript).join("");
+        input.value = transcript;
         input.focus();
     };
 
@@ -315,13 +537,7 @@ async function sendMessage() {
 
     if (!msg) return;
 
-    let chat = document.getElementById("chat");
-
-    let userMessage = document.createElement("div");
-    userMessage.className = "message user";
-    userMessage.textContent = msg;
-    chat.appendChild(userMessage);
-
+    addUserMessage(msg);
     input.value = "";
 
     let res = await fetch("/chat", {
@@ -332,13 +548,17 @@ async function sendMessage() {
 
     let data = await res.json();
     addBotMessage(data.reply);
+    loadHistory();
 }
 
-document.getElementById("message").addEventListener("keypress", function(e) {
+document.getElementById("message").addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
         sendMessage();
     }
 });
+
+applyTheme(localStorage.getItem("chatTheme") || "light");
+loadHistory();
 </script>
 </body>
 </html>

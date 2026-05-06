@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - AI Chatbot</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #172033;
+    background: linear-gradient(135deg, #f8fafc, #eef7f4);
+}
+
+.page {
+    width: min(980px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 22px 0;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.panel {
+    overflow: hidden;
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 16px 44px rgba(15, 23, 42, 0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+}
+
+td {
+    overflow-wrap: anywhere;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.count {
+    width: 130px;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+        display: none;
+    }
+}
+</style>
+</head>
+<body>
+<main class="page">
+    <div class="topbar">
+        <div class="brand">
+            <img src="/static/mypic.jpg" class="avatar" alt="Chatbot">
+            <span>Admin Panel</span>
+        </div>
+        <div>
+            <span>{{ admin_username }}</span> · <a href="/">Chat</a> · <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <section class="panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th class="count">Messages</th>
+                    <th>Latest Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in stats %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td class="count">{{ user.message_count }}</td>
+                        <td>{{ user.latest }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
