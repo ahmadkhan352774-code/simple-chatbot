@@ -37,6 +37,7 @@ load_dotenv()
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "change-this-secret-key")
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_MODEL = "openrouter/owl-alpha"
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
 CHAT_MEMORY = {}
 MAX_MEMORY_MESSAGES = 12
@@ -45,6 +46,11 @@ MAX_MEMORY_MESSAGES = 12
 def get_api_key():
     load_dotenv()
     return os.environ.get("OPENROUTER_API_KEY", "")
+
+
+def get_model():
+    load_dotenv()
+    return os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
 
 
 def get_user_memory():
@@ -170,11 +176,14 @@ def chat():
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:5001",
+        "X-Title": "Simple Chatbot",
     }
 
     data = {
-        "model": "google/gemma-3n-e4b-it:free",
+        "model": get_model(),
         "messages": messages,
+        "max_tokens": 300,
     }
 
     try:
@@ -183,7 +192,9 @@ def chat():
         response = client.post(API_URL, headers=headers, json=data, timeout=30)
         response.raise_for_status()
         result = response.json()
-        reply = result["choices"][0]["message"]["content"]
+        reply = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+        if not reply:
+            return jsonify({"reply": "OpenRouter returned an empty response. Please try again."}), 502
 
         memory = get_user_memory()
         memory.append({"role": "user", "content": user_message})
@@ -191,6 +202,17 @@ def chat():
         trim_memory(memory)
 
         return jsonify({"reply": reply})
+
+    except requests.exceptions.HTTPError:
+        try:
+            error_body = response.json()
+            error_message = error_body.get("error", {}).get("message") or response.text
+        except ValueError:
+            error_message = response.text
+
+        return jsonify({
+            "reply": f"OpenRouter error {response.status_code}: {error_message}"
+        }), response.status_code
 
     except Exception as e:
         return jsonify({"reply": f"Error: {str(e)}"})
